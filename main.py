@@ -96,7 +96,7 @@ async def process_date(message: types.Message, state: FSMContext):
     if message.text.isdigit():
         state = dp.get_current().current_state()
         await state.update_data(date=int(message.text))
-        await CreateUser.next()
+        await CreateUser.waiting_for_address.set()
         await message.answer(config['place_of_birth_question'])
     else:
         await message.answer('Возраст - это натуральное число!')
@@ -107,7 +107,6 @@ async def process_date(message: types.Message, state: FSMContext):
 async def process_address(message: types.Message, state: FSMContext):
     state = dp.get_current().current_state()
     user_data = await state.get_data()
-    print(user_data.get('date'))
     if session.query(TestUsers).filter_by(user_id=message.chat.id).first() is None:
             session.add(TestUsers(message.chat.id, user_data.get('date'), message.text))
             session.commit()
@@ -115,7 +114,8 @@ async def process_address(message: types.Message, state: FSMContext):
         session.execute(update(TestUsers).where(TestUsers.user_id == message.chat.id).values(date=user_data.get('date'), address=message.text))
         session.commit()
     await state.finish()
-    await advice_start(message)
+    await message.answer('Данные записаны')
+
 
 
 @dp.message_handler(lambda message: message.text)
