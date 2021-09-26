@@ -20,11 +20,13 @@ class WorkerView(APIView):
         return Response(serializer.data)
     
     def post(self, request):
-        workers = request.data.get('Worker')
-        serializer = VisitSerializer(data=workers)
+        name = request.data.get('name')
+        phone_number = request.data.get('phone_number')
+        data = {"name": name, "phone_number": phone_number}
+        serializer = self.serializer_class(data=data)
         if serializer.is_valid(raise_exception=True):
             workers_saved = serializer.save()
-        return Response({"success": "Worker '{}' created successfully".format(workers_saved.title)})   
+        return Response({"success": "Worker '{}' created successfully".format(workers_saved)})   
 
 
 class TradePointView(APIView):
@@ -39,11 +41,13 @@ class TradePointView(APIView):
         return Response(serializer.data)
     
     def post(self, request):
-        tradepoint = request.data.get('TradePoint')
-        serializer = VisitSerializer(data=tradepoint)
+        name = request.data.get('name')
+        worker = request.data.get('worker')
+        data = {"name": name, "worker": worker}
+        serializer = self.serializer_class(data=data)
         if serializer.is_valid(raise_exception=True):
             tradepoint_saved = serializer.save()
-        return Response({"success": "TradePoint '{}' created successfully".format(tradepoint_saved.title)})    
+        return Response({"success": "TradePoint '{}' created successfully".format(tradepoint_saved)})    
 
 class VisitView(APIView):
     serializer_class = VisitSerializer
@@ -54,11 +58,14 @@ class VisitView(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-        visit = request.data.get('Visit')
-        serializer = VisitSerializer(data=visit)
+        date = request.data.get('date')
+        place = request.data.get('place')
+        coords = request.data.get('coords')
+        data = {"date": date, "place": place, "coords": coords}
+        serializer = self.serializer_class(data=data)
         if serializer.is_valid(raise_exception=True):
             visit_saved = serializer.save()
-        return Response({"success": "visit '{}' created successfully".format(visit_saved.title)})
+        return Response({"success": "visit '{}' created successfully".format(visit_saved)})
 
 
 class  GetTradePointsByPhone(APIView):

@@ -2,3 +2,5 @@ Django
 djangorestframework
 mysqlclient
 django-filter
+phonenumber_field
+phonenumbers

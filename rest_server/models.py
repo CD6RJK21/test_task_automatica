@@ -1,11 +1,12 @@
 from django.db import models
+from phonenumber_field.modelfields import PhoneNumberField
 
 class Worker(models.Model):
     name = models.CharField(max_length=200, verbose_name='Имя')
-    phone_number = models.CharField(max_length=30, verbose_name='Телефон', unique=True)
+    phone_number = PhoneNumberField(null=False,verbose_name='Телефон', blank=False, unique=True)
     
     def __str__(self):
-        return '|'.join([str(self.id), self.name, self.phone_number])
+        return '|'.join([str(self.id), self.name, str(self.phone_number)])
 
 
 class TradePoint(models.Model):
