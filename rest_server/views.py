@@ -25,54 +25,8 @@ def check_user(self):
     except AttributeError as ae:
         return False
 
-
-class WorkerView(APIView):
-    lookup_field = 'worker'
-    serializer_class = WorkerSerializer
-
-    def get(self, request):
-        workers = Worker.objects.all()
-        serializer = self.serializer_class(workers, many=True)
-        return Response(serializer.data)
-    
-    def post(self, request):
-        if not check_user(self):
-            return Response('Worker not found or phone_number is not stated')
-        name = request.data.get('name')
-        phone_number = request.data.get('phone_number')
-        data = {"name": name, "phone_number": phone_number}
-        serializer = self.serializer_class(data=data)
-        if serializer.is_valid(raise_exception=True):
-            workers_saved = serializer.save()
-        return Response({"success": "Worker '{}' created successfully".format(workers_saved)})   
-
-
-class TradePointView(APIView):
-    queryset = TradePoint.objects.all()
-    serializer_class = TradePointSerializer
-
-    def get(self, request):
-        tradepoints = TradePoint.objects.all()
-        serializer = TradePointSerializer(tradepoints, many=True)
-        return Response(serializer.data)
-    
-    def post(self, request):
-        if not check_user(self):
-            return Response('Worker not found or phone_number is not stated')
-        name = request.data.get('name')
-        worker = request.data.get('worker')
-        data = {"name": name, "worker": worker}
-        serializer = self.serializer_class(data=data)
-        if serializer.is_valid(raise_exception=True):
-            tradepoint_saved = serializer.save()
-        return Response({"success": "TradePoint '{}' created successfully".format(tradepoint_saved)})    
-
 class VisitView(APIView):
     serializer_class = VisitSerializer
-    def get(self, request):
-        visits = Visit.objects.all()
-        serializer = self.serializer_class(visits, many=True)
-        return Response(serializer.data)
 
     def post(self, request):
         if not check_user(self):
@@ -90,7 +44,10 @@ class VisitView(APIView):
 class  GetTradePointsByPhone(APIView):
         lookup_field = 'phone_number'
         serializer_class = TradePointSerializer
+        
         def get(self, request):
+            if not check_user(self):
+                return Response('Worker not found or phone_number is not stated')
             tradepoints = self.get_queryset()
             serializer = self.serializer_class(tradepoints, many=True)
             return Response(serializer.data)
