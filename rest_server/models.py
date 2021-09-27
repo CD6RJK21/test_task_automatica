@@ -1,10 +1,35 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 from phonenumber_field.modelfields import PhoneNumberField
+from django.contrib.auth.backends import BaseBackend
+from django.contrib import admin
 
-class Worker(models.Model):
+class ReadOnlyAdmin(admin.ModelAdmin):
+    readonly_fields = ['coords', 'date', 'place']
+
+    def get_readonly_fields(self, request, obj=None):
+        return list(self.readonly_fields) + \
+               [field.name for field in obj._meta.fields] + \
+               [field.name for field in obj._meta.many_to_many]
+
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+class MyModelAdmin(ReadOnlyAdmin):
+    pass
+
+
+class Worker(AbstractUser):
     name = models.CharField(max_length=200, verbose_name='Имя')
     phone_number = PhoneNumberField(null=False,verbose_name='Телефон', blank=False, unique=True)
-    
+    password = ''
+    PASSWORD_FIELD = 'password'
+    USERNAME_FIELD = 'phone_number'
+
     def __str__(self):
         return '|'.join([str(self.id), self.name, str(self.phone_number)])
 

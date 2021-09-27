@@ -7,12 +7,24 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from . models import Worker, TradePoint, Visit
 from . serializers import TradePointSerializer, WorkerSerializer, VisitSerializer
-from django_filters.rest_framework import DjangoFilterBackend
-import  django_filters
+from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth import authenticate
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication, BaseAuthentication
+
+
+class LoginView(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+
+    def get(self, request, format=None):
+        content = {
+            'phone_number': str(request.username)  # `django.contrib.auth.User` instance.
+        }
+        return Response(content)
 
 class WorkerView(APIView):
     lookup_field = 'worker'
     serializer_class = WorkerSerializer
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         workers = Worker.objects.all()
@@ -32,8 +44,7 @@ class WorkerView(APIView):
 class TradePointView(APIView):
     queryset = TradePoint.objects.all()
     serializer_class = TradePointSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = django_filters.CharFilter(field_name='worker__phone_number', lookup_expr='iexact')
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         tradepoints = TradePoint.objects.all()
@@ -51,7 +62,7 @@ class TradePointView(APIView):
 
 class VisitView(APIView):
     serializer_class = VisitSerializer
-
+    permission_classes = [IsAuthenticated]
     def get(self, request):
         visits = Visit.objects.all()
         serializer = self.serializer_class(visits, many=True)
@@ -71,7 +82,8 @@ class VisitView(APIView):
 class  GetTradePointsByPhone(APIView):
         lookup_field = 'phone_number'
         serializer_class = TradePointSerializer
-        def get(self, request, phone_number='asdasd'):
+        permission_classes = [IsAuthenticated]
+        def get(self, request):
             tradepoints = self.get_queryset()
             serializer = self.serializer_class(tradepoints, many=True)
             return Response(serializer.data)
