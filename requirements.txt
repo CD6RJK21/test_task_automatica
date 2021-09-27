@@ -3,4 +3,4 @@ djangorestframework
 mysqlclient
 phonenumber_field
 phonenumbers
-dj_rest_auth
+django-readonly-model

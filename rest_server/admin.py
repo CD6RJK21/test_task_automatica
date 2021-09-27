@@ -3,4 +3,4 @@ from .models import Worker, TradePoint, Visit
 
 admin.site.register(Worker)
 admin.site.register(TradePoint)
-admin.site.register(Visit, readonly_fields=Visit._meta.names())
+admin.site.register(Visit)

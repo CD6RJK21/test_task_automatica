@@ -10,21 +10,25 @@ from . serializers import TradePointSerializer, WorkerSerializer, VisitSerialize
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, BaseAuthentication
+from phonenumbers import parse
 
 
-class LoginView(APIView):
-    authentication_classes = [SessionAuthentication, BasicAuthentication]
+# проверяет, есть ли worker с указанным в URL phone_number
+def check_user(self):
+    try:
+        phone_number = self.request.query_params.get('phone_number', None)
+        print(phone_number)
+        worker = Worker.objects.filter(phone_number=parse(phone_number, region='RU'))
+        if worker:
+            return True
+        return False
+    except AttributeError as ae:
+        return False
 
-    def get(self, request, format=None):
-        content = {
-            'phone_number': str(request.username)  # `django.contrib.auth.User` instance.
-        }
-        return Response(content)
 
 class WorkerView(APIView):
     lookup_field = 'worker'
     serializer_class = WorkerSerializer
-    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         workers = Worker.objects.all()
@@ -32,6 +36,8 @@ class WorkerView(APIView):
         return Response(serializer.data)
     
     def post(self, request):
+        if not check_user(self):
+            return Response('Worker not found or phone_number is not stated')
         name = request.data.get('name')
         phone_number = request.data.get('phone_number')
         data = {"name": name, "phone_number": phone_number}
@@ -44,7 +50,6 @@ class WorkerView(APIView):
 class TradePointView(APIView):
     queryset = TradePoint.objects.all()
     serializer_class = TradePointSerializer
-    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         tradepoints = TradePoint.objects.all()
@@ -52,6 +57,8 @@ class TradePointView(APIView):
         return Response(serializer.data)
     
     def post(self, request):
+        if not check_user(self):
+            return Response('Worker not found or phone_number is not stated')
         name = request.data.get('name')
         worker = request.data.get('worker')
         data = {"name": name, "worker": worker}
@@ -62,13 +69,14 @@ class TradePointView(APIView):
 
 class VisitView(APIView):
     serializer_class = VisitSerializer
-    permission_classes = [IsAuthenticated]
     def get(self, request):
         visits = Visit.objects.all()
         serializer = self.serializer_class(visits, many=True)
         return Response(serializer.data)
 
     def post(self, request):
+        if not check_user(self):
+            return Response('Worker not found or phone_number is not stated')
         date = request.data.get('date')
         place = request.data.get('place')
         coords = request.data.get('coords')
@@ -82,7 +90,6 @@ class VisitView(APIView):
 class  GetTradePointsByPhone(APIView):
         lookup_field = 'phone_number'
         serializer_class = TradePointSerializer
-        permission_classes = [IsAuthenticated]
         def get(self, request):
             tradepoints = self.get_queryset()
             serializer = self.serializer_class(tradepoints, many=True)

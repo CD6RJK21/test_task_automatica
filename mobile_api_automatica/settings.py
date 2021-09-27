@@ -39,15 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_server',
-    'django_filters'
+    'readonly_model'
 ]
-
-AUTH_USER_MODEL = 'rest_server.models.Worker'
-
-REST_AUTH_SERIALIZERS = {
-    'USER_DETAILS_SERIALIZER': 'rest_server.serializers.CustomUserDetailsSerializer',
-    'REGISTER_SERIALIZER': 'rest_server.serializers.CustomRegisterSerializer'
-}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
