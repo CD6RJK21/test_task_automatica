@@ -17,7 +17,6 @@ from phonenumbers import parse
 def check_user(self):
     try:
         phone_number = self.request.query_params.get('phone_number', None)
-        print(phone_number)
         worker = Worker.objects.filter(phone_number=parse(phone_number, region='RU'))
         if worker:
             return True
@@ -44,7 +43,7 @@ class VisitView(APIView):
 class  GetTradePointsByPhone(APIView):
         lookup_field = 'phone_number'
         serializer_class = TradePointSerializer
-        
+
         def get(self, request):
             if not check_user(self):
                 return Response('Worker not found or phone_number is not stated')
@@ -53,5 +52,5 @@ class  GetTradePointsByPhone(APIView):
             return Response(serializer.data)
         
         def get_queryset(self):
-            phone_number = self.kwargs.get('phone_number', None)
+            phone_number = self.request.query_params.get('phone_number', None)
             return TradePoint.objects.filter(worker__phone_number=phone_number)
